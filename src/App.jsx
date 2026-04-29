@@ -255,6 +255,29 @@ const SCAN_NAMES = [
   'Ravi K.', 'Lucas G.', 'Zara M.', 'Owen S.', 'Ines T.', 'Kai R.',
 ];
 
+const FUNNY_PHRASES = [
+  'Our AI is doing AI things',
+  'Bribing the algorithm with snacks',
+  'Whispering sweet APIs to the server',
+  'Filtering out the chaos goblins',
+  'Reading résumés faster than you can blink',
+  'Translating LinkedIn-speak into English',
+  'Sniffing out the red flags',
+  'Scanning vibes AND qualifications',
+  'Cross-checking timezones with caffeine levels',
+  'Pretending we don\'t have favorites',
+  'Doing math no human should ever do',
+  'Sorting unicorns from the lookalikes',
+  'Asking the matrix really nicely',
+  'Triple-checking the Workable feed',
+  'Brewing a fresh batch of matches',
+  'Mining gold from the inbox pile',
+  'Counting years of *real* experience',
+  'Running it through the vibe-check engine',
+  'Decoding "rockstar ninja" buzzwords',
+  'Manifesting your dream hire',
+];
+
 const AIAnalysis = ({ onComplete, jobData }) => {
   const [step, setStep] = useState(0);
   const [scanned, setScanned] = useState(0);
@@ -262,6 +285,7 @@ const AIAnalysis = ({ onComplete, jobData }) => {
   const [scanningName, setScanningName] = useState(SCAN_NAMES[0]);
   const [feed, setFeed] = useState([]);
   const [revealMatch, setRevealMatch] = useState(false);
+  const phrase = useRef(FUNNY_PHRASES[Math.floor(Math.random() * FUNNY_PHRASES.length)]).current;
 
   const steps = [
     { icon: Brain, label: 'Reading job spec', color: '#B4A7FF', detail: jobData?.title || 'role' },
@@ -335,8 +359,8 @@ const AIAnalysis = ({ onComplete, jobData }) => {
               <h2 className="text-3xl font-black mb-2" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
                 Hunting your perfect VA...
               </h2>
-              <p className="text-stone-600 text-sm">
-                Scanning <span className="font-black">{scanned.toLocaleString()}</span> profiles in real time
+              <p className="text-stone-600 text-sm italic">
+                {phrase}
               </p>
             </div>
 
