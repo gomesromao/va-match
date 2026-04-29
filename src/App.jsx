@@ -7,7 +7,7 @@ import { Heart, X, Sparkles, Briefcase, MapPin, Globe, Star, Zap, ChevronRight, 
 const MOCK_CANDIDATES = [
   {
     id: 1,
-    name: 'Christian Rafols',
+    name: 'Mateo Villanueva',
     avatar: '🧑🏻‍💻',
     bgColor: '#FFD93D',
     location: 'Baguio City, Philippines',
@@ -15,7 +15,7 @@ const MOCK_CANDIDATES = [
     rate: '$12/hr',
     yearsExp: 6,
     headline: 'Web Dev & Marketing Specialist',
-    bio: 'Full-stack web developer with deep SEO chops. Built Chris Rafols Web Services from scratch — I move fast, ship clean, and obsess over conversion.',
+    bio: 'Full-stack web developer with deep SEO chops. Built my own web services agency from scratch — I move fast, ship clean, and obsess over conversion.',
     skills: ['Web Development', 'SEO (Local & On-page)', 'WordPress', 'Shopify', 'GoHighLevel', 'CRO Design', 'UX/UI', 'Automation'],
     tools: ['Figma', 'Semrush', 'Ahrefs', 'Canva', 'Asana', 'Slack'],
     languages: ['English (Fluent)', 'Tagalog (Native)'],
@@ -248,64 +248,205 @@ const JobForm = ({ onSubmit }) => {
 };
 
 // ----- AI ANALYSIS LOADING -----
-const AIAnalysis = ({ onComplete }) => {
+const SCAN_NAMES = [
+  'Mateo V.', 'Sofia M.', 'Marcus T.', 'Priya S.', 'João A.',
+  'Aiko N.', 'Liam O.', 'Carla V.', 'Rohan B.', 'Mei L.', 'Diego R.',
+  'Hana K.', 'Amelia W.', 'Jin H.', 'Tania F.', 'Noah P.', 'Bea L.',
+  'Ravi K.', 'Lucas G.', 'Zara M.', 'Owen S.', 'Ines T.', 'Kai R.',
+];
+
+const AIAnalysis = ({ onComplete, jobData }) => {
   const [step, setStep] = useState(0);
+  const [scanned, setScanned] = useState(0);
+  const [shortlisted, setShortlisted] = useState(0);
+  const [scanningName, setScanningName] = useState(SCAN_NAMES[0]);
+  const [feed, setFeed] = useState([]);
+  const [revealMatch, setRevealMatch] = useState(false);
+
   const steps = [
-    { icon: Brain, label: 'Analyzing job requirements', color: '#B4A7FF' },
-    { icon: Database, label: 'Searching your candidate database', color: '#FFD93D' },
-    { icon: Search, label: 'Pulling fresh candidates from Workable', color: '#A8E6CF' },
-    { icon: Sparkles, label: 'Cross-matching skills & vibes', color: '#FF8FA3' },
-    { icon: CheckCircle2, label: 'Ranking your top matches', color: '#FFB4A2' },
+    { icon: Brain, label: 'Reading job spec', color: '#B4A7FF', detail: jobData?.title || 'role' },
+    { icon: Database, label: 'Scanning your candidate DB', color: '#FFD93D', detail: '2,847 profiles' },
+    { icon: Search, label: 'Pulling fresh from Workable', color: '#A8E6CF', detail: 'live API' },
+    { icon: Sparkles, label: 'Cross-matching skills & vibes', color: '#FF8FA3', detail: 'semantic search' },
+    { icon: CheckCircle2, label: 'Ranking your top matches', color: '#FFB4A2', detail: 'scoring…' },
   ];
 
+  // Step progression
   useEffect(() => {
     if (step >= steps.length) {
-      const t = setTimeout(onComplete, 500);
-      return () => clearTimeout(t);
+      const t1 = setTimeout(() => setRevealMatch(true), 200);
+      const t2 = setTimeout(onComplete, 1800);
+      return () => { clearTimeout(t1); clearTimeout(t2); };
     }
-    const t = setTimeout(() => setStep(step + 1), 800);
+    const t = setTimeout(() => setStep(step + 1), 1100);
     return () => clearTimeout(t);
   }, [step]);
 
-  return (
-    <div className="min-h-screen w-full flex items-center justify-center px-6" style={{ background: 'linear-gradient(180deg, #E8F7F1 0%, #C4EBDC 100%)' }}>
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-block animate-spin-slow mb-4">
-            <div className="text-6xl">🤖</div>
-          </div>
-          <h2 className="text-3xl font-black mb-2" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
-            Cooking up matches...
-          </h2>
-          <p className="text-stone-600">Our AI is doing AI things</p>
-        </div>
+  // Counter ticking up — accelerates to feel "alive"
+  useEffect(() => {
+    if (step >= steps.length) return;
+    const interval = setInterval(() => {
+      setScanned((s) => {
+        const target = 2847;
+        const remaining = target - s;
+        if (remaining <= 0) return s;
+        const inc = Math.max(7, Math.ceil(remaining / 18));
+        return Math.min(target, s + inc);
+      });
+    }, 40);
+    return () => clearInterval(interval);
+  }, [step, steps.length]);
 
-        <div className="bg-white border-4 border-black rounded-3xl p-6 space-y-3" style={{ boxShadow: '6px 6px 0px #000' }}>
-          {steps.map((s, i) => {
-            const Icon = s.icon;
-            const isActive = i === step;
-            const isDone = i < step;
-            return (
-              <div
-                key={i}
-                className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all duration-500 ${
-                  isActive ? 'border-black scale-105' : isDone ? 'border-black opacity-60' : 'border-stone-200 opacity-40'
-                }`}
-                style={{ background: isActive || isDone ? s.color : 'white' }}
-              >
-                <div className={`${isActive ? 'animate-bounce' : ''}`}>
-                  {isDone ? <CheckCircle2 size={22} strokeWidth={2.5} /> : <Icon size={22} strokeWidth={2.5} />}
-                </div>
-                <div className="font-bold text-sm flex-1">{s.label}</div>
-                {isActive && <div className="flex gap-1">
-                  <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
-                  <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
-                  <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
-                </div>}
+  // Shortlist counter — more relaxed
+  useEffect(() => {
+    if (step < 2 || step >= steps.length) return;
+    const interval = setInterval(() => {
+      setShortlisted((s) => (s < 5 ? s + 1 : s));
+    }, 700);
+    return () => clearInterval(interval);
+  }, [step, steps.length]);
+
+  // Rolling profile names + scoring feed
+  useEffect(() => {
+    if (step >= steps.length) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      const name = SCAN_NAMES[i % SCAN_NAMES.length];
+      setScanningName(name);
+      // Drop scoring lines onto a live feed
+      const score = 40 + Math.floor(Math.random() * 60);
+      setFeed((f) => [{ id: Date.now() + i, name, score }, ...f].slice(0, 4));
+      i++;
+    }, 180);
+    return () => clearInterval(interval);
+  }, [step, steps.length]);
+
+  const pct = Math.min(100, Math.round((scanned / 2847) * 100));
+
+  return (
+    <div className="min-h-screen w-full flex items-center justify-center px-6 py-10" style={{ background: 'linear-gradient(180deg, #E8F7F1 0%, #C4EBDC 100%)' }}>
+      <div className="w-full max-w-md">
+        {!revealMatch ? (
+          <>
+            <div className="text-center mb-6">
+              <div className="inline-block animate-spin-slow mb-4">
+                <div className="text-6xl">🔎</div>
               </div>
-            );
-          })}
-        </div>
+              <h2 className="text-3xl font-black mb-2" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
+                Hunting your perfect VA...
+              </h2>
+              <p className="text-stone-600 text-sm">
+                Scanning <span className="font-black">{scanned.toLocaleString()}</span> profiles in real time
+              </p>
+            </div>
+
+            {/* Live scan panel */}
+            <div className="bg-black border-4 border-black rounded-3xl p-4 mb-4 text-white font-mono" style={{ boxShadow: '6px 6px 0px #FF6B35' }}>
+              <div className="flex items-center justify-between text-[10px] mb-2 opacity-70">
+                <span className="flex items-center gap-1.5">
+                  <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+                  LIVE SCAN
+                </span>
+                <span>{pct}%</span>
+              </div>
+              {/* Progress bar */}
+              <div className="h-2 bg-stone-800 rounded-full overflow-hidden mb-3">
+                <div
+                  className="h-full bg-gradient-to-r from-yellow-300 to-orange-400 transition-all duration-150"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              {/* Currently scanning */}
+              <div className="text-xs mb-3 flex items-center gap-2">
+                <span className="opacity-60">→ scanning:</span>
+                <span className="text-yellow-300 font-bold truncate">{scanningName}</span>
+              </div>
+              {/* Score feed */}
+              <div className="space-y-1 min-h-[80px]">
+                {feed.map((row, i) => (
+                  <div
+                    key={row.id}
+                    className="flex items-center justify-between text-[11px] transition-all"
+                    style={{ opacity: 1 - i * 0.22 }}
+                  >
+                    <span className="truncate opacity-80">{row.name}</span>
+                    <span className={`font-bold ${row.score >= 75 ? 'text-green-400' : row.score >= 55 ? 'text-yellow-300' : 'text-stone-400'}`}>
+                      {row.score}% match
+                    </span>
+                  </div>
+                ))}
+              </div>
+              {/* Stats footer */}
+              <div className="flex justify-between mt-3 pt-3 border-t border-stone-800 text-[10px] opacity-70">
+                <span>shortlisted: <span className="text-yellow-300 font-bold">{shortlisted}</span></span>
+                <span>analyzed: <span className="text-yellow-300 font-bold">{scanned.toLocaleString()}</span></span>
+              </div>
+            </div>
+
+            {/* Step list */}
+            <div className="bg-white border-4 border-black rounded-3xl p-4 space-y-2" style={{ boxShadow: '6px 6px 0px #000' }}>
+              {steps.map((s, i) => {
+                const Icon = s.icon;
+                const isActive = i === step;
+                const isDone = i < step;
+                return (
+                  <div
+                    key={i}
+                    className={`flex items-center gap-3 p-2.5 rounded-2xl border-2 transition-all duration-500 ${
+                      isActive ? 'border-black scale-[1.02]' : isDone ? 'border-black opacity-60' : 'border-stone-200 opacity-40'
+                    }`}
+                    style={{ background: isActive || isDone ? s.color : 'white' }}
+                  >
+                    <div className={`${isActive ? 'animate-bounce' : ''}`}>
+                      {isDone ? <CheckCircle2 size={20} strokeWidth={2.5} /> : <Icon size={20} strokeWidth={2.5} />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-sm truncate">{s.label}</div>
+                      <div className="text-[10px] font-bold opacity-60 truncate">{s.detail}</div>
+                    </div>
+                    {isActive && (
+                      <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" />
+                        <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" style={{ animationDelay: '0.2s' }} />
+                        <div className="w-1.5 h-1.5 bg-black rounded-full animate-pulse" style={{ animationDelay: '0.4s' }} />
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        ) : (
+          // Final reveal — "MATCH FOUND"
+          <div className="text-center animate-pop-in">
+            <div className="inline-block bg-yellow-300 border-4 border-black rounded-full px-5 py-1.5 mb-4 transform -rotate-3" style={{ boxShadow: '4px 4px 0px #FF6B35' }}>
+              <span className="font-black text-sm" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
+                🎯 TOP MATCH LOCKED IN
+              </span>
+            </div>
+            <h2 className="text-4xl font-black mb-3 leading-tight" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
+              Found your<br />
+              <span className="italic">perfect candidate</span>
+            </h2>
+            <div className="bg-white border-4 border-black rounded-3xl p-5 my-5" style={{ boxShadow: '6px 6px 0px #000' }}>
+              <div className="text-xs font-black uppercase tracking-wider text-stone-500 mb-2">Top result</div>
+              <div className="flex items-center gap-3">
+                <div className="text-5xl">🧑🏻‍💻</div>
+                <div className="flex-1 text-left">
+                  <div className="font-black text-lg" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
+                    Mateo Villanueva
+                  </div>
+                  <div className="text-xs text-stone-600">Web Dev & Marketing Specialist</div>
+                </div>
+                <div className="bg-black text-yellow-300 rounded-full w-14 h-14 flex flex-col items-center justify-center transform rotate-6">
+                  <div className="text-lg font-black leading-none">94%</div>
+                  <div className="text-[7px] font-bold uppercase tracking-wider">Match</div>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm text-stone-700 font-bold">+ 4 other strong candidates ready to swipe →</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -477,7 +618,7 @@ const SwipeDeck = ({ jobData, onFinish }) => {
   const scoredCandidates = useRef(
     MOCK_CANDIDATES
       .map((c) => {
-        // Christian gets a high score because the form mentions web dev/SEO/marketing
+        // Mateo gets a high score because the form mentions web dev/SEO/marketing
         let score;
         if (c.id === 1) score = 94;
         else if (c.id === 4) score = 87; // marketing automation
@@ -698,7 +839,7 @@ export default function App() {
       `}</style>
 
       {screen === 'form' && <JobForm onSubmit={handleJobSubmit} />}
-      {screen === 'analyzing' && <AIAnalysis onComplete={handleAnalysisComplete} />}
+      {screen === 'analyzing' && <AIAnalysis onComplete={handleAnalysisComplete} jobData={jobData} />}
       {screen === 'swipe' && <SwipeDeck jobData={jobData} onFinish={handleFinish} />}
     </div>
   );
