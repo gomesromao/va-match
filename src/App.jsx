@@ -20,7 +20,14 @@ const MOCK_CANDIDATES = [
     tools: ['Figma', 'Semrush', 'Ahrefs', 'Canva', 'Asana', 'Slack'],
     languages: ['English (Fluent)', 'Tagalog (Native)'],
     education: 'BS Information Technology — University of the Cordilleras',
-    highlight: 'Real candidate from your database',
+    highlights: [
+      'Real candidate from your database',
+      'Built funnels for 12+ marketing teams',
+      '5-star feedback across past gigs',
+      'Top SEO performer last quarter',
+      'Hits all 4 must-have skills',
+      'Already vetted by your hiring team',
+    ],
     isReal: true,
     workStyle: 'Async-first, deadline-driven',
   },
@@ -39,7 +46,14 @@ const MOCK_CANDIDATES = [
     tools: ['Google Workspace', 'Notion', 'Slack', 'Calendly', 'Zoom'],
     languages: ['English (Fluent)', 'Spanish (Conversational)'],
     education: 'BA Business Administration — Ateneo de Manila',
-    highlight: 'Hot pick from Workable',
+    highlights: [
+      'Hot pick from Workable',
+      'Inbox-zero specialist',
+      'EST overlap = chef\'s kiss',
+      'C-suite VA experience x3 companies',
+      'Calendar wizard energy',
+      'Available to start next week',
+    ],
     isReal: false,
     workStyle: 'Highly responsive, 9-5 EST overlap',
   },
@@ -58,7 +72,14 @@ const MOCK_CANDIDATES = [
     tools: ['Adobe Creative Suite', 'Figma', 'CapCut', 'After Effects', 'Canva'],
     languages: ['English (Fluent)', 'Cebuano (Native)'],
     education: 'BFA Visual Communication — University of San Carlos',
-    highlight: 'Top-rated in your DB',
+    highlights: [
+      'Top-rated in your DB',
+      'Portfolio that stops the scroll',
+      'Adobe Suite + CapCut = full stack',
+      '7 years, zero missed deadlines',
+      'Brand → content pipeline locked in',
+      'Worked with Y Combinator startups',
+    ],
     isReal: false,
     workStyle: 'Creative bursts, flexible hours',
   },
@@ -77,7 +98,14 @@ const MOCK_CANDIDATES = [
     tools: ['HubSpot', 'Zapier', 'Make.com', 'ActiveCampaign', 'Airtable'],
     languages: ['English (Fluent)', 'Hindi (Native)'],
     education: 'B.Tech Computer Science — IIT Madras',
-    highlight: 'New on Workable',
+    highlights: [
+      'New on Workable',
+      'Zapier black-belt',
+      'IIT Madras pedigree',
+      'Built funnels that printed money',
+      'Marketing automation OG',
+      'HubSpot certified x4',
+    ],
     isReal: false,
     workStyle: 'Systems thinker, loves SOPs',
   },
@@ -96,11 +124,39 @@ const MOCK_CANDIDATES = [
     tools: ['Intercom', 'Zendesk', 'HubSpot', 'Slack', 'Loom'],
     languages: ['Portuguese (Native)', 'English (Fluent)', 'Spanish (Fluent)'],
     education: 'Communications — USP',
-    highlight: 'Trilingual unicorn',
+    highlights: [
+      'Trilingual unicorn',
+      'PT/EN/ES — full coverage',
+      'CSat scores in the top 5%',
+      'Fastest first-response we\'ve seen',
+      'Empathy meets efficiency',
+      'Handled 8k+ tickets without burnout',
+    ],
     isReal: false,
     workStyle: 'Warm, patient, EST/PST overlap',
   },
 ];
+
+// ============================================
+// SCORING — randomized so each search has a different winner
+// ============================================
+const SCORE_BUCKETS = [
+  [88, 96], // top match
+  [80, 87],
+  [72, 79],
+  [65, 71],
+  [58, 64],
+];
+
+function generateScoredCandidates() {
+  const shuffled = [...MOCK_CANDIDATES].sort(() => Math.random() - 0.5);
+  return shuffled.map((c, i) => {
+    const [lo, hi] = SCORE_BUCKETS[i] || [50, 57];
+    const matchScore = lo + Math.floor(Math.random() * (hi - lo + 1));
+    const highlight = c.highlights[Math.floor(Math.random() * c.highlights.length)];
+    return { ...c, matchScore, highlight };
+  });
+}
 
 // ============================================
 // SCREENS
@@ -278,7 +334,7 @@ const FUNNY_PHRASES = [
   'Manifesting your dream hire',
 ];
 
-const AIAnalysis = ({ onComplete, jobData }) => {
+const AIAnalysis = ({ onComplete, jobData, topMatch }) => {
   const [step, setStep] = useState(0);
   const [scanned, setScanned] = useState(0);
   const [shortlisted, setShortlisted] = useState(0);
@@ -452,22 +508,24 @@ const AIAnalysis = ({ onComplete, jobData }) => {
               Found your<br />
               <span className="italic">perfect candidate</span>
             </h2>
-            <div className="bg-white border-4 border-black rounded-3xl p-5 my-5" style={{ boxShadow: '6px 6px 0px #000' }}>
-              <div className="text-xs font-black uppercase tracking-wider text-stone-500 mb-2">Top result</div>
-              <div className="flex items-center gap-3">
-                <div className="text-5xl">🧑🏻‍💻</div>
-                <div className="flex-1 text-left">
-                  <div className="font-black text-lg" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
-                    Mateo Villanueva
+            {topMatch && (
+              <div className="bg-white border-4 border-black rounded-3xl p-5 my-5" style={{ boxShadow: '6px 6px 0px #000' }}>
+                <div className="text-xs font-black uppercase tracking-wider text-stone-500 mb-2">Top result</div>
+                <div className="flex items-center gap-3">
+                  <div className="text-5xl">{topMatch.avatar}</div>
+                  <div className="flex-1 text-left min-w-0">
+                    <div className="font-black text-lg truncate" style={{ fontFamily: '"Fraunces", Georgia, serif' }}>
+                      {topMatch.name}
+                    </div>
+                    <div className="text-xs text-stone-600 truncate">{topMatch.headline}</div>
                   </div>
-                  <div className="text-xs text-stone-600">Web Dev & Marketing Specialist</div>
-                </div>
-                <div className="bg-black text-yellow-300 rounded-full w-14 h-14 flex flex-col items-center justify-center transform rotate-6">
-                  <div className="text-lg font-black leading-none">94%</div>
-                  <div className="text-[7px] font-bold uppercase tracking-wider">Match</div>
+                  <div className="bg-black text-yellow-300 rounded-full w-14 h-14 flex flex-col items-center justify-center transform rotate-6 flex-shrink-0">
+                    <div className="text-lg font-black leading-none">{topMatch.matchScore}%</div>
+                    <div className="text-[7px] font-bold uppercase tracking-wider">Match</div>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
             <p className="text-sm text-stone-700 font-bold">+ 4 other strong candidates ready to swipe →</p>
           </div>
         )}
@@ -631,28 +689,12 @@ const CandidateCard = ({ candidate, matchScore, onSwipe, isTop, offset = 0, swip
 };
 
 // ----- SWIPE DECK -----
-const SwipeDeck = ({ jobData, onFinish }) => {
+const SwipeDeck = ({ jobData, scoredCandidates, onFinish }) => {
   const [index, setIndex] = useState(0);
   const [matches, setMatches] = useState([]);
   const [passes, setPasses] = useState([]);
   const [swipingDirection, setSwipingDirection] = useState(null);
   const [showMatchPopup, setShowMatchPopup] = useState(null);
-
-  // Generate match scores once based on job
-  const scoredCandidates = useRef(
-    MOCK_CANDIDATES
-      .map((c) => {
-        // Mateo gets a high score because the form mentions web dev/SEO/marketing
-        let score;
-        if (c.id === 1) score = 94;
-        else if (c.id === 4) score = 87; // marketing automation
-        else if (c.id === 3) score = 76;
-        else if (c.id === 2) score = 71;
-        else score = 64;
-        return { ...c, matchScore: score };
-      })
-      .sort((a, b) => b.matchScore - a.matchScore)
-  ).current;
 
   const handleSwipe = (direction) => {
     setSwipingDirection(direction);
@@ -813,9 +855,11 @@ const SwipeDeck = ({ jobData, onFinish }) => {
 export default function App() {
   const [screen, setScreen] = useState('form'); // 'form' | 'analyzing' | 'swipe'
   const [jobData, setJobData] = useState(null);
+  const [scoredCandidates, setScoredCandidates] = useState(null);
 
   const handleJobSubmit = (data) => {
     setJobData(data);
+    setScoredCandidates(generateScoredCandidates());
     setScreen('analyzing');
   };
 
@@ -863,8 +907,8 @@ export default function App() {
       `}</style>
 
       {screen === 'form' && <JobForm onSubmit={handleJobSubmit} />}
-      {screen === 'analyzing' && <AIAnalysis onComplete={handleAnalysisComplete} jobData={jobData} />}
-      {screen === 'swipe' && <SwipeDeck jobData={jobData} onFinish={handleFinish} />}
+      {screen === 'analyzing' && <AIAnalysis onComplete={handleAnalysisComplete} jobData={jobData} topMatch={scoredCandidates?.[0]} />}
+      {screen === 'swipe' && <SwipeDeck jobData={jobData} scoredCandidates={scoredCandidates} onFinish={handleFinish} />}
     </div>
   );
 }
